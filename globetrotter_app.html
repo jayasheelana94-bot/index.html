@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeTrotter - AI-Powered Travel Planning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Auth Pages */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-logo h1 {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .auth-logo p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-light);
+        }
+
+        .auth-switch a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+        }
+
+        /* Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Trip Cards */
+        .trips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .trip-card {
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .trip-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+        }
+
+        .trip-content {
+            padding: 20px;
+        }
+
+        .trip-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .trip-meta {
+            display: flex;
+            gap: 16px;
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .trip-budget {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 16px;
+        }
+
+        .trip-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* Trip Planner */
+        .planner-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .cities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .city-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .city-order {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .city-info {
+            flex: 1;
+        }
+
+        .city-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .city-days {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* Calendar View */
+        .calendar {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .calendar-day:hover {
+            background: var(--bg);
+        }
+
+        .calendar-day.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Activities */
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .activity-card {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .activity-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .activity-card.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .activity-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .activity-details {
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* Budget Breakdown */
+        .budget-summary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .budget-total {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .budget-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .budget-item {
+            background: var(--card);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .budget-item-label {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .budget-item-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* AI Recommendations */
+        .recommendations {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .recommendation-card {
+            background: rgba(255,255,255,0.95);
+            color: var(--text);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .recommendation-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .recommendation-description {
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 8px 16px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-tag:hover, .filter-tag.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid var(--secondary);
+        }
+
+        /* Timeline View */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 32px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -28px;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border: 3px solid var(--card);
+            border-radius: 50%;
+        }
+
+        .timeline-content {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-nav {
+                gap: 12px;
+            }
+            
+            .stats-grid, .trips-grid, .activities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 4px;
+            }
+
+            .calendar-day {
+                font-size: 12px;
+                padding: 4px;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>🌍 GlobeTrotter</h1>
+                <p>AI-Powered Travel Planning</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div class="auth-switch">
+                Don't have an account? <a id="showSignup">Sign up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Page -->
+    <div id="signupPage" class="auth-container hidden">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>🌍 GlobeTrotter</h1>
+                <p>Create Your Account</p>
+            </div>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" required placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Travel Preferences</label>
+                    <select id="signupPreferences" multiple style="height: 100px;">
+                        <option value="adventure">Adventure</option>
+                        <option value="culture">Culture</option>
+                        <option value="relaxation">Relaxation</option>
+                        <option value="food">Food & Dining</option>
+                        <option value="nature">Nature</option>
+                        <option value="nightlife">Nightlife</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Budget Range</label>
+                    <select id="signupBudget" required>
+                        <option value="budget">Budget ($-$$)</option>
+                        <option value="moderate">Moderate ($$-$$$)</option>
+                        <option value="luxury">Luxury ($$$-$$$$)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+            <div class="auth-switch">
+                Already have an account? <a id="showLogin">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">🌍 GlobeTrotter</div>
+                    <nav class="header-nav">
+                        <a class="nav-link" id="navDashboard">Dashboard</a>
+                        <a class="nav-link" id="navTrips">My Trips</a>
+                        <a class="nav-link" id="navProfile">Profile</a>
+                        <div class="user-menu">
+                            <div class="user-avatar" id="userAvatar">U</div>
+                        </div>
+                        <a class="nav-link" id="logoutBtn">Logout</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <div id="dashboardPage" class="main-content">
+            <div class="container">
+                <div class="page-header">
+                    <h1 class="page-title">Welcome back, <span id="userName"></span>!</h1>
+                    <p class="page-subtitle">Plan your next adventure with AI-powered recommendations</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Trips</div>
+                        <div class="stat-value" id="totalTrips">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Cities Visited</div>
+                        <div class="stat-value" id="citiesVisited">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Budget</div>
+                        <div class="stat-value" id="totalBudget">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Upcoming Trips</div>
+                        <div class="stat-value" id="upcomingTrips">0</div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h2 style="margin-bottom: 24px;">✨ AI Recommendations for You</h2>
+                    <div id="aiRecommendations"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 class="section-title">Your Trips</h2>
+                    <button class="btn btn-primary" id="createTripBtn">+ New Trip</button>
+                </div>
+
+                <div class="trips-grid" id="tripsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profilePage" class="main-content hidden">
+            <div class="container">
+                <div class="page-header">
+                    <h1 class="page-title">Your Profile</h1>
+                    <p class="page-subtitle">Manage your account and preferences</p>
+                </div>
+
+                <div class="planner-section">
+                    <h2 class="section-title">Personal Information</h2>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="profileName">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profileEmail" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Travel Preferences</label>
+                            <select id="profilePreferences" multiple style="height: 120px;">
+                                <option value="adventure">Adventure</option>
+                                <option value="culture">Culture</option>
+                                <option value="relaxation">Relaxation</option>
+                                <option value="food">Food & Dining</option>
+                                <option value="nature">Nature</option>
+                                <option value="nightlife">Nightlife</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Budget Range</label>
+                            <select id="profileBudget">
+                                <option value="budget">Budget ($-$$)</option>
+                                <option value="moderate">Moderate ($$-$$$)</option>
+                                <option value="luxury">Luxury ($$$-$$$$)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Trip Modal -->
+    <div id="createTripModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Create New Trip</h2>
+                <button class="modal-close" id="closeCreateTrip">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="createTripForm">
+                    <div class="form-group">
+                        <label>Trip Name</label>
+                        <input type="text" id="tripName" required placeholder="My European Adventure">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="tripStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" id="tripEndDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Budget ($)</label>
+                        <input type="number" id="tripBudget" required placeholder="5000">
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Travelers</label>
+                        <input type="number" id="tripTravelers" required value="1" min="1">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Continue to Add Cities</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trip Details Modal -->
+    <div id="tripDetailsModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="tripDetailsTitle"></h2>
+                <button class="modal-close" id="closeTripDetails">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Trip Summary -->
+                <div class="budget-summary">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <div style="font-size: 18px; margin-bottom: 8px;">Total Budget</div>
+                            <div class="budget-total" id="tripDetailsBudget">$0</div>
+                        </div>
+                        <div>
+                            <button class="btn btn-secondary" id="addCityBtn">+ Add City</button>
+                            <button class="btn btn-outline" id="shareTrip" style="color: white; border-color: white; margin-left: 8px;">Share Trip</button>
+                        </div>
+                    </div>
+                    <div id="tripDetailsDate" style="font-size: 16px; opacity: 0.9;"></div>
+                </div>
+
+                <!-- AI Suggestions -->
+                <div id="tripAISuggestions" class="planner-section">
+                    <h3 class="section-title"><span class="ai-badge">✨ AI</span> Personalized Suggestions</h3>
+                    <div id="tripAIContent"></div>
+                </div>
+
+                <!-- Cities -->
+                <div class="planner-section">
+                    <h3 class="section-title">Cities & Itinerary</h3>
+                    <div id="tripCities" class="cities-list"></div>
+                </div>
+
+                <!-- Budget Breakdown -->
+                <div class="planner-section">
+                    <h3 class="section-title">Budget Breakdown</h3>
+                    <div id="budgetAlerts"></div>
+                    <div class="budget-items" id="budgetBreakdown"></div>
+                </div>
+
+                <!-- Timeline View -->
+                <div class="planner-section">
+                    <h3 class="section-title">Day-by-Day Timeline</h3>
+                    <div class="timeline" id="tripTimeline"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add City Modal -->
+    <div id="addCityModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
